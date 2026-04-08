@@ -106,7 +106,7 @@ export default function ApplicationDetail({ params }) {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="animate-pulse space-y-6">
           <div className="h-6 bg-gray-200 rounded w-32" />
           <div className="h-10 bg-gray-200 rounded w-64" />
@@ -118,7 +118,7 @@ export default function ApplicationDetail({ params }) {
 
   if (!app) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
         <h1 className="text-2xl font-bold text-gray-900">Application Not Found</h1>
         <p className="text-gray-600 mt-2">This application may have been deleted.</p>
         <Link href="/applications" className="text-indigo-600 hover:text-indigo-700 mt-4 inline-block">
@@ -132,7 +132,7 @@ export default function ApplicationDetail({ params }) {
   const checklistDone = checklistKeys.filter((k) => app.checklist[k]).length;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link href="/applications" className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
