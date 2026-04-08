@@ -1,27 +1,5 @@
 // In-memory data store — resets on server restart
 
-const STATUSES = [
-  'wishlist',
-  'applied',
-  'phone-screen',
-  'technical',
-  'onsite',
-  'offer',
-  'accepted',
-  'rejected',
-];
-
-const STATUS_LABELS = {
-  wishlist: 'Wishlist',
-  applied: 'Applied',
-  'phone-screen': 'Phone Screen',
-  technical: 'Technical',
-  onsite: 'Onsite',
-  offer: 'Offer',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-};
-
 let nextAppId = 5;
 let nextQuestionId = 7;
 
@@ -239,4 +217,9 @@ export function deleteQuestion(id) {
   return true;
 }
 
-export { STATUSES, STATUS_LABELS };
+export function updateQuestion(id, data) {
+  const idx = questions.findIndex((q) => q.id === id);
+  if (idx === -1) return null;
+  questions[idx] = { ...questions[idx], ...data, id };
+  return questions[idx];
+}

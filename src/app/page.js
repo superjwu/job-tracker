@@ -4,29 +4,27 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import StatsCard from '@/components/StatsCard';
 import StatusBadge from '@/components/StatusBadge';
-
-const PIPELINE_STAGES = [
-  { key: 'wishlist', label: 'Wishlist', color: 'bg-gray-400' },
-  { key: 'applied', label: 'Applied', color: 'bg-blue-500' },
-  { key: 'phone-screen', label: 'Phone', color: 'bg-purple-500' },
-  { key: 'technical', label: 'Technical', color: 'bg-orange-500' },
-  { key: 'onsite', label: 'Onsite', color: 'bg-yellow-500' },
-  { key: 'offer', label: 'Offer', color: 'bg-emerald-500' },
-  { key: 'accepted', label: 'Accepted', color: 'bg-green-600' },
-  { key: 'rejected', label: 'Rejected', color: 'bg-red-500' },
-];
+import { useToast } from '@/components/Toast';
+import { PIPELINE_STAGES } from '@/lib/constants';
 
 export default function Dashboard() {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   useEffect(() => {
-    fetch('/api/applications')
-      .then((res) => res.json())
-      .then((data) => {
-        setApps(data);
+    async function load() {
+      try {
+        const res = await fetch('/api/applications');
+        if (!res.ok) throw new Error('Failed to load');
+        setApps(await res.json());
+      } catch {
+        toast.error('Failed to load applications');
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+    load();
   }, []);
 
   const statusCounts = {};
@@ -40,7 +38,7 @@ export default function Dashboard() {
   const activeCount = apps.filter(
     (a) => !['accepted', 'rejected'].includes(a.status)
   ).length;
-  const offerCount = statusCounts.offer + statusCounts.accepted;
+  const offerCount = (statusCounts.offer || 0) + (statusCounts.accepted || 0);
   const maxCount = Math.max(...Object.values(statusCounts), 1);
 
   const recentApps = [...apps]
@@ -80,20 +78,18 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <StatsCard label="Total Applications" value={apps.length} color="indigo" />
         <StatsCard label="Active" value={activeCount} color="blue" />
         <StatsCard label="Offers" value={offerCount} color="green" />
-        <StatsCard label="Rejected" value={statusCounts.rejected} color="red" />
+        <StatsCard label="Rejected" value={statusCounts.rejected || 0} color="red" />
       </div>
 
-      {/* Pipeline Visualization */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-10">
         <h2 className="text-lg font-semibold text-gray-900 mb-5">Pipeline</h2>
         <div className="space-y-3">
           {PIPELINE_STAGES.map((stage) => {
-            const count = statusCounts[stage.key];
+            const count = statusCounts[stage.key] || 0;
             const width = maxCount > 0 ? (count / maxCount) * 100 : 0;
             return (
               <div key={stage.key} className="flex items-center gap-3">
@@ -117,7 +113,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Activity */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-5">Recent Activity</h2>
         {recentApps.length === 0 ? (

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const links = [
   { href: '/', label: 'Dashboard' },
@@ -13,6 +13,11 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   function isActive(href) {
     if (href === '/') return pathname === '/';
@@ -47,6 +52,7 @@ export default function Navbar() {
           <button
             className="sm:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle navigation menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileOpen ? (
@@ -65,7 +71,6 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setMobileOpen(false)}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive(link.href)
                     ? 'bg-indigo-50 text-indigo-700'

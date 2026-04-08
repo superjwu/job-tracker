@@ -1,65 +1,106 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import QuestionCard from '@/components/QuestionCard';
+import { useToast } from '@/components/Toast';
+import { CATEGORIES, DIFFICULTIES } from '@/lib/constants';
 
-const CATEGORIES = [
-  { value: 'all', label: 'All' },
-  { value: 'behavioral', label: 'Behavioral' },
-  { value: 'technical', label: 'Technical' },
-  { value: 'system-design', label: 'System Design' },
-];
-
-const DIFFICULTIES = ['easy', 'medium', 'hard'];
+const DEFAULT_FORM = {
+  category: 'behavioral',
+  question: '',
+  answer: '',
+  difficulty: 'medium',
+};
 
 export default function PracticePage() {
   const [questions, setQuestions] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const [form, setForm] = useState({
-    category: 'behavioral',
-    question: '',
-    answer: '',
-    difficulty: 'medium',
-  });
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const toast = useToast();
 
   useEffect(() => {
     loadQuestions();
   }, []);
 
-  function loadQuestions() {
-    fetch('/api/questions')
-      .then((res) => res.json())
-      .then((data) => {
-        setQuestions(data);
-        setLoading(false);
-      });
+  async function loadQuestions() {
+    try {
+      const res = await fetch('/api/questions');
+      if (!res.ok) throw new Error('Failed to load');
+      setQuestions(await res.json());
+    } catch {
+      toast.error('Failed to load questions');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const res = await fetch('/api/questions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
-      setForm({ category: 'behavioral', question: '', answer: '', difficulty: 'medium' });
+    setSubmitting(true);
+    try {
+      const trimmed = { ...form, question: form.question.trim(), answer: form.answer.trim() };
+      const res = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(trimmed),
+      });
+      if (!res.ok) throw new Error('Failed to create');
+      setForm(DEFAULT_FORM);
       setShowForm(false);
-      loadQuestions();
+      await loadQuestions();
+      toast.success('Question added');
+    } catch {
+      toast.error('Failed to add question');
+    } finally {
+      setSubmitting(false);
     }
   }
 
   async function handleDelete(qId) {
-    const res = await fetch(`/api/questions?id=${qId}`, { method: 'DELETE' });
-    if (res.ok) {
-      loadQuestions();
+    try {
+      const res = await fetch(`/api/questions/${qId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      await loadQuestions();
+      toast.success('Question deleted');
+    } catch {
+      toast.error('Failed to delete question');
     }
   }
 
-  const filtered = filter === 'all' ? questions : questions.filter((q) => q.category === filter);
+  async function handleEdit(qId, data) {
+    try {
+      const res = await fetch(`/api/questions/${qId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to update');
+      await loadQuestions();
+      toast.success('Question updated');
+    } catch {
+      toast.error('Failed to update question');
+    }
+  }
+
+  const filtered = useMemo(() => {
+    let result = questions;
+    if (filter !== 'all') {
+      result = result.filter((q) => q.category === filter);
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.question.toLowerCase().includes(q) ||
+          item.answer.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [questions, filter, search]);
 
   if (loading) {
     return (
@@ -98,22 +139,16 @@ export default function PracticePage() {
         </button>
       </div>
 
-      {/* Add Form */}
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-gray-200 p-6 mb-6"
-        >
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">New Question</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select
-                  value={form.category}
+                <select value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                >
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                   {CATEGORIES.filter((c) => c.value !== 'all').map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
                   ))}
@@ -121,11 +156,9 @@ export default function PracticePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
-                <select
-                  value={form.difficulty}
+                <select value={form.difficulty}
                   onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                >
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                   {DIFFICULTIES.map((d) => (
                     <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
                   ))}
@@ -134,49 +167,53 @@ export default function PracticePage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Question *</label>
-              <input
-                required
-                type="text"
-                value={form.question}
+              <input required type="text" value={form.question}
                 onChange={(e) => setForm({ ...form, question: e.target.value })}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="e.g. What is the difference between TCP and UDP?"
-              />
+                placeholder="e.g. What is the difference between TCP and UDP?" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Answer / Notes</label>
-              <textarea
-                value={form.answer}
+              <textarea value={form.answer}
                 onChange={(e) => setForm({ ...form, answer: e.target.value })}
                 rows={4}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-y"
-                placeholder="Your answer or key talking points..."
-              />
+                placeholder="Your answer or key talking points..." />
             </div>
           </div>
           <div className="mt-4 flex justify-end">
-            <button
-              type="submit"
-              className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
-            >
-              Save Question
+            <button type="submit" disabled={submitting}
+              className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50">
+              {submitting ? 'Saving...' : 'Save Question'}
             </button>
           </div>
         </form>
       )}
 
-      {/* Category Filter */}
+      {/* Search + Category Filter */}
+      <div className="mb-4">
+        <div className="relative">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search questions or answers..."
+            className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+
       <div className="flex flex-wrap gap-2 mb-6">
         {CATEGORIES.map((c) => (
-          <button
-            key={c.value}
-            onClick={() => setFilter(c.value)}
+          <button key={c.value} onClick={() => setFilter(c.value)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               filter === c.value
                 ? 'bg-indigo-600 text-white'
                 : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
+            }`}>
             {c.label}
             {c.value !== 'all' && (
               <span className="ml-1 opacity-75">
@@ -187,15 +224,16 @@ export default function PracticePage() {
         ))}
       </div>
 
-      {/* Question Cards */}
       {filtered.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">No questions found. Add your first one!</p>
+          <p className="text-gray-500">
+            {search ? 'No questions match your search.' : 'No questions found. Add your first one!'}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
           {filtered.map((q) => (
-            <QuestionCard key={q.id} question={q} onDelete={handleDelete} />
+            <QuestionCard key={q.id} question={q} onDelete={handleDelete} onEdit={handleEdit} />
           ))}
         </div>
       )}

@@ -1,13 +1,6 @@
 'use client';
 
-const CHECKLIST_LABELS = {
-  resumeTailored: 'Resume tailored for role',
-  coverLetter: 'Cover letter written',
-  companyResearched: 'Company researched',
-  linkedinConnected: 'LinkedIn connection made',
-  portfolioUpdated: 'Portfolio updated',
-  mockInterview: 'Mock interview completed',
-};
+import { CHECKLIST_LABELS } from '@/lib/constants';
 
 export default function ChecklistItem({ itemKey, checked, onChange }) {
   const label = CHECKLIST_LABELS[itemKey] || itemKey;
@@ -26,5 +19,3 @@ export default function ChecklistItem({ itemKey, checked, onChange }) {
     </label>
   );
 }
-
-export { CHECKLIST_LABELS };
