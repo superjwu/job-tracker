@@ -7,16 +7,18 @@ export default function ApplicationCard({ app }) {
   return (
     <Link
       href={`/applications/${app.id}`}
-      className="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-indigo-200 transition-all"
+      className="animate-fade-up block bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-5 card-hover group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate">{app.company}</h3>
-          <p className="text-sm text-gray-600 mt-0.5">{app.role}</p>
+          <h3 className="font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+            {app.company}
+          </h3>
+          <p className="text-sm text-gray-500 mt-0.5">{app.role}</p>
         </div>
         <StatusBadge status={app.status} />
       </div>
-      <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+      <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
         {app.location && (
           <span className="flex items-center gap-1">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,6 +45,7 @@ export default function ApplicationCard({ app }) {
           </span>
         )}
       </div>
+      <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" />
     </Link>
   );
 }

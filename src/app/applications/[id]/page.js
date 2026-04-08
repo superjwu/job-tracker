@@ -127,30 +127,30 @@ export default function ApplicationDetail({ params }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-6">
-        <Link href="/applications" className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mb-6 animate-fade-up">
+        <Link href="/applications" className="text-sm text-indigo-500 hover:text-indigo-700 flex items-center gap-1 group transition-colors">
+          <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Applications
         </Link>
       </div>
 
-      <div className="flex items-start justify-between gap-4 mb-8">
+      <div className="flex items-start justify-between gap-4 mb-8 animate-fade-up" style={{ animationDelay: '60ms' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{app.company}</h1>
-          <p className="text-lg text-gray-600 mt-1">{app.role}</p>
+          <h1 className="text-3xl font-extrabold text-gradient">{app.company}</h1>
+          <p className="text-lg text-gray-500 mt-1">{app.role}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <StatusBadge status={app.status} size="lg" />
-          {saving && <span className="text-xs text-gray-400">Saving...</span>}
+          {saving && <span className="text-xs text-indigo-400 animate-pulse">Saving...</span>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Details Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-6 shadow-sm animate-fade-up">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Details</h2>
               <button onClick={() => setEditing(!editing)}
@@ -239,7 +239,7 @@ export default function ApplicationDetail({ params }) {
           </div>
 
           {/* Company Research Notes */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-6 shadow-sm animate-fade-up">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-gray-900">Company Research Notes</h2>
               {notesSaved && (
@@ -259,7 +259,7 @@ export default function ApplicationDetail({ params }) {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-6 shadow-sm animate-fade-up">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Status</h2>
             <div className="space-y-1.5">
               {STATUSES.map((status) => (
@@ -275,13 +275,13 @@ export default function ApplicationDetail({ params }) {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-6 shadow-sm animate-fade-up">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-gray-900">Prep Checklist</h2>
               <span className="text-xs text-gray-500">{checklistDone}/{checklistKeys.length}</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-              <div className="bg-indigo-600 h-2 rounded-full transition-all"
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full transition-all duration-500"
                 style={{ width: `${(checklistDone / checklistKeys.length) * 100}%` }} />
             </div>
             <div className="space-y-0.5">
@@ -293,7 +293,7 @@ export default function ApplicationDetail({ params }) {
           </div>
 
           <button onClick={handleDelete}
-            className="w-full text-center px-4 py-2 rounded-lg text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 transition-colors">
+            className="w-full text-center px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 border border-red-200/60 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200">
             Delete Application
           </button>
         </div>

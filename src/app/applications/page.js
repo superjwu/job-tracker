@@ -124,14 +124,14 @@ export default function ApplicationsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 animate-fade-up">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
-          <p className="text-gray-600 mt-1">{apps.length} total applications</p>
+          <h1 className="text-3xl font-extrabold text-gradient">Applications</h1>
+          <p className="text-gray-500 mt-1">{apps.length} total applications</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="btn-shine inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-indigo-200 transition-all duration-300 hover:-translate-y-0.5"
         >
           {showForm ? (
             'Cancel'
@@ -147,7 +147,7 @@ export default function ApplicationsPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <form onSubmit={handleSubmit} className="animate-fade-up bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-6 mb-6 shadow-sm">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">New Application</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -204,7 +204,7 @@ export default function ApplicationsPage() {
           </div>
           <div className="mt-4 flex justify-end">
             <button type="submit" disabled={submitting}
-              className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50">
+              className="btn-shine bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-indigo-200 transition-all disabled:opacity-50">
               {submitting ? 'Saving...' : 'Save Application'}
             </button>
           </div>
@@ -264,7 +264,7 @@ export default function ApplicationsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger">
           {filtered.map((app) => (
             <ApplicationCard key={app.id} app={app} />
           ))}

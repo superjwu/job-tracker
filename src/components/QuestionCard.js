@@ -19,7 +19,7 @@ export default function QuestionCard({ question, onDelete, onEdit }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="animate-fade-up bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 overflow-hidden card-hover">
       <button
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
